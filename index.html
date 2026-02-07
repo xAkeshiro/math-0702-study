@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Math 0702 Study Hub</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#0f172a,#1e293b);min-height:100vh;color:#fff}
+.header{background:rgba(255,255,255,.05);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.1);padding:16px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50}
+.header-title{display:flex;align-items:center;gap:12px}
+.header-title h1{font-size:18px;color:#fff}
+.header-title p{font-size:13px;color:#94a3b8}
+.btn{padding:8px 16px;border-radius:8px;cursor:pointer;font-weight:600;font-size:14px;border:none;transition:all .2s}
+.btn-ghost{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2)}
+.btn-primary{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff}
+.btn-primary:hover{opacity:.9}
+.container{max-width:800px;margin:0 auto;padding:24px 16px}
+.section-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:20px;margin-bottom:16px;border-left:4px solid var(--accent)}
+.section-card h3{color:#fff;font-size:16px;margin-bottom:4px}
+.section-card p{color:#94a3b8;font-size:13px}
+.section-actions{display:flex;gap:8px;margin-top:12px}
+.btn-section{padding:8px 18px;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer}
+.q-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:20px;margin-bottom:16px;color:#111}
+.q-card.correct{background:#dcfce7}
+.q-card.wrong{background:#fee2e2}
+.q-card .q-num{font-weight:600;font-size:15px;color:#374151;margin-bottom:8px}
+.q-card .q-text{font-size:18px;color:#111;font-family:Georgia,serif;line-height:1.6;margin-bottom:16px}
+.q-card input[type=text]{width:100%;padding:10px 14px;border-radius:8px;border:1px solid #d1d5db;font-size:16px;box-sizing:border-box}
+.mc-btn{display:block;width:100%;padding:10px 16px;border-radius:8px;border:1px solid #d1d5db;background:#f9fafb;cursor:pointer;text-align:left;font-size:15px;margin-bottom:8px;transition:all .2s}
+.mc-btn.selected{border:2px solid #3b82f6;background:#dbeafe}
+.result-correct{color:#16a34a;font-weight:600;margin-top:12px}
+.result-wrong{color:#dc2626;font-weight:600;margin-top:12px}
+.hint{color:#6b7280;font-size:14px;font-style:italic;margin-top:4px}
+.progress{background:rgba(255,255,255,.1);border-radius:8px;height:6px;margin-top:12px}
+.progress-fill{background:#6366f1;border-radius:8px;height:6px;transition:width .3s}
+.score-badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:13px;color:#fff;margin-top:8px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:24px}
+.stat{background:rgba(255,255,255,.05);border-radius:10px;padding:16px;text-align:center}
+.stat .val{font-size:24px;font-weight:700}
+.stat .label{color:#94a3b8;font-size:13px}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal{background:#fff;border-radius:16px;padding:28px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;color:#111}
+.modal h2{font-size:22px;margin-bottom:20px}
+.modal h3{color:#4b5563;border-bottom:2px solid #e5e7eb;padding-bottom:6px;margin-bottom:10px;margin-top:16px}
+.formula-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.formula-item{background:#f3f4f6;padding:8px 12px;border-radius:6px;font-family:monospace;font-size:14px}
+.final-score{background:rgba(255,255,255,.05);border-radius:12px;padding:24px;margin-bottom:16px;text-align:center}
+.final-score .big{font-size:42px;font-weight:700}
+.final-score .sub{color:#94a3b8}
+.center{display:flex;gap:12px;justify-content:center}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>[...a].sort(()=>Math.random()-.5);
+
+const generators={
+"0.1":[
+()=>{const types=["rational","irrational","integer","whole","prime","even integer"];const t=pick(types);const nums=[rand(-9,9),rand(-9,-1),`${rand(1,9)}/${rand(2,9)}`,`√${pick([2,3,5,7,11])}`,"0","π",String(rand(2,20))];const n=pick(nums);const isR=v=>!v.includes("√")&&v!=="π";const isIr=v=>v.includes("√")||v==="π";const isInt=v=>!v.includes("/")&&!v.includes("√")&&v!=="π"&&Number.isInteger(Number(v));const isW=v=>isInt(v)&&Number(v)>=0;const isP=v=>{const x=Number(v);if(!Number.isInteger(x)||x<2)return false;for(let i=2;i*i<=x;i++)if(x%i===0)return false;return true};const isE=v=>isInt(v)&&Number(v)%2===0;const c={"rational":isR,"irrational":isIr,"integer":isInt,"whole":isW,"prime":isP,"even integer":isE};return{question:`Is ${n} a ${t} number?`,answer:c[t](n)?"Yes":"No",choices:["Yes","No"],type:"mc",hint:`Think about the definition of ${t} numbers.`}},
+()=>{const a=rand(-8,3),b=a+rand(2,8);const f=pick([{i:`x < ${b}`,v:`(-∞, ${b})`,h:"< = open paren"},{i:`x ≤ ${b}`,v:`(-∞, ${b}]`,h:"�j$ = closed bracket"},{i:`x > ${a}`,v:`(${a}, ∞)`,h:"> = open"},{i:`x ≥ ${a}`,v:`[${a}, ∞)`,h:"≥ = closed"},{i:`${a} < x < ${b}`,v:`(${a}, ${b})`,h:"Both strict = both open"},{i:`${a} ≤ x < ${b}`,v:`[${a}, ${b})`,h:"≤ = [, < = )"},{i:`${a} ≤ x ≤ ${b}`,v:`[${a}, ${b}]`,h:"Both ≤ = both closed"}]);return{question:`Write in interval notation: ${f.i}`,answer:f.v,type:"input",hint:f.h}},
+()=>{const a=rand(-10,10),b=rand(-10,10);return{question:`Evaluate: |${a} - ${b}|`,answer:String(Math.abs(a-b)),type:"input",hint:"Compute inside, then absolute value."}},
+()=>{const a=rand(-20,20),b=rand(-20,20);return{question:`Distance between ${a} and ${b} on the number line?`,answer:String(Math.abs(a-b)),type:"input",hint:"Distance = |a - b|"}},
+()=>{const a=rand(-8,0),b=rand(1,8);if(Math.random()>.5)return{question:`Union: x < ${a} or x ≥ ${b}`,answer:`(-∞, ${a}) ∪ [${b}, ∞)`,type:"input",hint:"'or' = union ∪"};return{question:`Intersection: x ≥ ${a} and x < ${b}`,answer:`[${a}, ${b})`,type:"input",hint:"'and' = overlap"}},
+()=>{const a=rand(1,10),c=rand(-20,-(a+1));return{question:`Simplify |x + ${a}| given x ≤ ${c}`,answer:`-(x + ${a})`,type:"input",hint:`x+${a} is negative here, so negate`}}
+],
+"0.2":[
+()=>{const base=pick([-5,-4,-3,-2,2,3,4,5]),exp=rand(2,4);if(Math.random()>.5)return{question:`Evaluate: (${base})^${exp}`,answer:String(Math.pow(base,exp)),type:"input",hint:`Multiply ${base} by itself ${exp} times`};return{question:`Evaluate: -${Math.abs(base)}^${exp}`,answer:String(-Math.pow(Math.abs(base),exp)),type:"input",hint:"Neg NOT in parens → apply after power"}},
+()=>{const v=pick(["x","y","a","b"]),a=rand(2,8),b=rand(2,8);return{question:`Simplify: ${v}^${a} · ${v}^${b}`,answer:`${v}^${a+b}`,type:"input",hint:"Multiply same base: ADD exponents"}},
+()=>{const v=pick(["x","y","a","s"]),a=rand(5,12),b=rand(2,a-1);return{question:`Simplify: ${v}^${a} / ${v}^${b}`,answer:`${v}^${a-b}`,type:"input",hint:"Divide same base: SUBTRACT exponents"}},
+()=>{const v=pick(["x","y","a","r"]),a=rand(2,5),b=rand(2,4);return{question:`Simplify: (${v}^${a})^${b}`,answer:`${v}^${a*b}`,type:"input",hint:"Power of power: MULTIPLY exponents"}},
+()=>{const v=pick(["x","y","a"]),n=rand(2,6);return{question:`No neg exponents: ${v}^(-${n})`,answer:`1/${v}^${n}`,type:"input",hint:"x^(-n) = 1/x^n"}},
+()=>{const c=rand(2,9),v=pick(["x","y","a"]);if(Math.random()>.5)return{question:`Simplify: -${c}${v}^0`,answer:String(-c),type:"input",hint:"x^0 = 1"};return{question:`Simplify: ${c}${v}^0`,answer:String(c),type:"input",hint:"x^0 = 1"}},
+()=>{const x=rand(-5,-1),z=rand(2,5);return{question:`x=${x}, z=${z}. Evaluate: -xz³`,answer:String(-x*z*z*z),type:"input",hint:`-(${x})(${z}³)`}}
+],
+"0.3":[
+()=>{const pairs=[[4,2],[9,3],[16,4],[25,5],[36,6],[49,7],[64,8],[81,9],[100,10]];const[b,r]=pick(pairs);return{question:`Simplify: √${b}`,answer:String(r),type:"input",hint:`${r}² = ${b}`}},
+()=>{const pairs=[[8,2],[27,3],[64,4],[125,5]];const[b,r]=pick(pairs);return{question:`Simplify: ³√${b}`,answer:String(r),type:"input",hint:`${r}³ = ${b}`}},
+()=>{const base=pick([4,9,16,25]),r=Math.round(Math.sqrt(base));return{question:`Simplify: ${base}^(-1/2)`,answer:`1/${r}`,type:"input",hint:`a^(-1/2) = 1/√a`}},
+()=>{const a=rand(2,6),rem=rand(2,7),inner=a*a*rem;return{question:`Simplify: √${inner}`,answer:`${a}√${rem}`,type:"input",hint:`√(${a}²·${rem}) = ${a}√${rem}`}},
+()=>{const a=rand(2,9),b=rand(2,9);return{question:`Rationalize: ${a}/√${b}`,answer:`${a}√${b}/${b}`,type:"input",hint:`Multiply by √${b}/√${b}`}},
+()=>{const b=rand(1,4),c=rand(1,4),u=rand(2,7);return{question:`Simplify: ${b}√${u} + ${c}√${u}`,answer:`${b+c}√${u}`,type:"input",hint:"Like radicals: add coefficients"}},
+()=>{const bases=[8,27,64,125],base=pick(bases),r=Math.round(Math.cbrt(base)),p=rand(2,3);return{question:`Simplify: ${base}^(${p}/3)`,answer:String(Math.pow(r,p)),type:"input",hint:`(³√${base})^${p} = ${r}^${p}`}}
+],
+"0.4":[
+()=>{const t=pick([{e:()=>`${rand(2,9)}x^${rand(2,7)}`,t:"monomial"},{e:()=>`${rand(2,9)}x^${rand(2,5)} + ${rand(1,8)}`,t:"binomial"},{e:()=>`${rand(1,5)}x² + ${rand(1,5)}x + ${rand(1,9)}`,t:"trinomial"}]);return{question:`Classify: "${t.e()}"`,answer:t.t,choices:["monomial","binomial","trinomial"],type:"mc",hint:"1 term=mono, 2=bi, 3=tri"}},
+()=>{const a=rand(1,5),b=rand(1,5),c=rand(1,5),d=rand(1,5);return{question:`Simplify: (${a}x² + ${b}x) + (${c}x² + ${d}x)`,answer:`${a+c}x² + ${b+d}x`,type:"input",hint:"Combine like terms"}},
+()=>{const a=rand(2,7),b=rand(2,7),m=rand(1,4),n=rand(1,4);return{question:`Simplify: ${a}x^${m} · ${b}x^${n}`,answer:`${a*b}x^${m+n}`,type:"input",hint:"Multiply coefficients, add exponents"}},
+()=>{const a=rand(1,8),b=rand(1,8),s1=pick(["+","-"]),s2=pick(["+","-"]);const v1=s1==="+"?a:-a,v2=s2==="+"?b:-b;const mid=v1+v2,last=v1*v2;const ms=mid>=0?`+ ${mid}`:`- ${Math.abs(mid)}`,ls=last>=0?`+ ${last}`:`- ${Math.abs(last)}`;return{question:`Expand: (x ${s1} ${a})(x ${s2} ${b})`,answer:`x² ${ms}x ${ls}`,type:"input",hint:"FOIL: First·Outer·Inner·Last"}},
+()=>{const a=rand(2,9),b=rand(1,7);return{question:`Expand: (${a}x + ${b})(${a}x - ${b})`,answer:`${a*a}x² - ${b*b}`,type:"input",hint:"(a+b)(a-b) = a²-b²"}},
+()=>{const a=rand(1,6),b=rand(1,6);if(Math.random()>.5)return{question:`Expand: (${a}x + ${b})²`,answer:`${a*a}x² + ${2*a*b}x + ${b*b}`,type:"input",hint:"(a+b)² = a²+2ab+b²"};return{question:`Expand: (${a}x - ${b})²`,answer:`${a*a}x² - ${2*a*b}x + ${b*b}`,type:"input",hint:"(a-b)² = a²-2ab+b²"}}
+],
+"0.5":[
+()=>{const a=pick([2,3,4,5,6,7,8,9]),b=pick([1,2,3,4,5,6,7]);return{question:`Factor: ${a*a}x² - ${b*b}`,answer:`(${a}x + ${b})(${a}x - ${b})`,type:"input",hint:"a²-b² = (a+b)(a-b)"}},
+()=>{const a=rand(1,7);if(Math.random()>.5)return{question:`Factor: x² + ${2*a}x + ${a*a}`,answer:`(x + ${a})²`,type:"input",hint:"Perfect square trinomial"};return{question:`Factor: x² - ${2*a}x + ${a*a}`,answer:`(x - ${a})²`,type:"input",hint:"Perfect square trinomial"}},
+()=>{let p=rand(-9,9),q=rand(-9,9);if(p===0)p=2;if(q===0)q=3;const b=p+q,c=p*q;const bs=b>=0?`+ ${b}`:`- ${Math.abs(b)}`,cs=c>=0?`+ ${c}`:`- ${Math.abs(c)}`;const ps=p>=0?`+ ${p}`:`- ${Math.abs(p)}`,qs=q>=0?`+ ${q}`:`- ${Math.abs(q)}`;return{question:`Factor: x² ${bs}x ${cs}`,answer:`(x ${ps})(x ${qs})`,type:"input",hint:`Two nums: multiply to ${c}, add to ${b}`}},
+()=>{const a=rand(1,5),b=rand(1,5);return{question:`Factor by grouping: x² + ${a}x + ${b}x + ${a*b}`,answer:`(x + ${a})(x + ${b})`,type:"input",hint:"Group pairs, factor each, then common binomial"}},
+()=>{const a=pick([1,2,3,4,5]),c=a*a*a;return{question:`Factor sum of cubes: x³ + ${c}`,answer:`(x + ${a})(x² - ${a}x + ${a*a})`,type:"input",hint:`a³+b³ = (a+b)(a²-ab+b²)`}},
+()=>{const a=pick([1,2,3,4,5]),c=a*a*a;return{question:`Factor diff of cubes: x³ - ${c}`,answer:`(x - ${a})(x² + ${a}x + ${a*a})`,type:"input",hint:`a³-b³ = (a-b)(a²+ab+b²)`}},
+()=>{const g=rand(2,6),a=rand(1,5),b=rand(1,5),v=pick(["x","y"]);return{question:`Factor GCF: ${g*a}${v}³ + ${g*b}${v}²`,answer:`${g}${v}²(${a}${v} + ${b})`,type:"input",hint:"Pull out the greatest common factor"}}
+]
+};
+
+const sections={"0.1":{title:"0.1: Real Numbers & Intervals",color:"#3b82f6",topics:"Number types, interval notation, absolute value, distance"},"0.2":{title:"0.2: Exponents",color:"#8b5cf6",topics:"Exponent rules, simplifying, evaluating"},"0.3":{title:"0.3: Radicals & Rational Exponents",color:"#ec4899",topics:"Roots, rational exponents, rationalizing"},"0.4":{title:"0.4: Polynomials",color:"#f59e0b",topics:"Operations, FOIL, special products"},"0.5":{title:"0.5: Factoring",color:"#10b981",topics:"GCF, grouping, trinomials, cubes"}};
+
+const formulas=[{title:"Exponent Rules",items:["x^a · x^b = x^(a+b)","x^a / x^b = x^(a-b)","(x^a)^b = x^(ab)","x^0 = 1","x^(-n) = 1/x^n"]},{title:"Special Products",items:["(a+b)² = a² + 2ab + b²","(a-b)² = a² - 2ab + b²","(a+b)(a-b) = a² - b²"]},{title:"Factoring",items:["a²-b² = (a+b)(a-b)","a²+2ab+b² = (a+b)²","a²-2ab+b² = (a-b)²","a³+b³ = (a+b)(a²-ab+b²)","a³-b³ = (a-b)(a²+ab+b²)"]},{title:"Radicals",items:["a^(m/n) = ⁿ√(a^m)","√a·√b = √(ab)","√a/√b = √(a/b)"]},{title:"Intervals",items:["( = open","[ = closed","∞ always gets )","∪ = or, ∩ = and"]}];
+
+let state={view:"menu",section:null,questions:[],answers:{},showResults:false,showFormulas:false,scores:{"0.1":null,"0.2":null,"0.3":null,"0.4":null,"0.5":null},mode:"practice"};
+
+function gen(sec,count=8){const gs=generators[sec];const qs=[];for(let i=0;i<count;i++)qs.push(gs[i%gs.length]());return qs;}
+
+function startSection(sec,exam=false){state.section=sec;state.mode=exam?"exam":"practice";state.questions=gen(sec,exam?12:8);state.answers={};state.showResults=false;state.view="quiz";render();}
+
+function startFull(){const all=[];Object.keys(generators).forEach(s=>{const gs=generators[s];for(let i=0;i<4;i++)all.push(gs[i%gs.length]())});state.questions=shuffle(all);state.section="all";state.mode="exam";state.answers={};state.showResults=false;state.view="quiz";render();}
+
+function setAnswer(i,v){state.answers[i]=v;render();}
+
+function submit(){state.showResults=true;if(state.section&&state.section!=="all"){let c=0;state.questions.forEach((q,i)=>{if((state.answers[i]||"").toLowerCase().replace(/\s/g,"")===q.answer.toLowerCase().replace(/\s/g,""))c++});state.scores[state.section]=Math.round(c/state.questions.length*100);}render();}
+
+function goMenu(){state.view="menu";render();}
+function toggleFormulas(){state.showFormulas=!state.showFormulas;render();}
+
+function render(){
+const app=document.getElementById("app");
+const answered=Object.keys(state.answers).length;
+
+let html=``;
+
+// Formula modal
+if(state.showFormulas){
+html+=`<div class="modal-overlay" onclick="toggleFormulas()"><div class="modal" onclick="event.stopPropagation()"><div style="display:flex;justify-content:space-between;align-items:center"><h2>📋 Formula Sheet</h2><button onclick="toggleFormulas()" style="background:none;border:none;font-size:24px;cursor:pointer">✕</button></div>`;
+formulas.forEach(s=>{html+=`<h3>${s.title}</h3><div class="formula-grid">${s.items.map(i=>`<div class="formula-item">${i}</div>`).join("")}</div>`});
+html+=`</div></div>`;
+}
+
+// Header
+html+=`<div class="header"><div class="header-title"><span style="font-size:28px">📐</span><div><h1>Math 0702 Study Hub</h1><p>Sections 0.1–0.5 · Test Prep</p></div></div><div style="display:flex;gap:10px"><button class="btn btn-ghost" onclick="toggleFormulas()">📋 Formulas</button>${state.view!=="menu"?`<button class="btn btn-ghost" onclick="goMenu()">← Menu</button>`:""}</div></div>`;
+
+html+=`<div class="container">`;
+
+if(state.view==="menu"){
+html+=`<div style="text-align:center;margin-bottom:32px"><h1 style="font-size:32px;margin-bottom:8px">🎯 Monday Test Prep</h1><p style="color:#94a3b8;font-size:16px">Practice each section or take a full mock exam</p></div>`;
+
+Object.entries(sections).forEach(([k,s])=>{
+const score=state.scores[k];
+const badge=score!==null?`<div class="score-badge" style="background:${score>=80?"#065f46":score>=60?"#92400e":"#991b1b"}">Last: ${score}%</div>`:"";
+html+=`<div class="section-card" style="--accent:${s.color}"><h3>${s.title}</h3><p>${s.topics}</p>${badge}<div class="section-actions"><button class="btn-section" style="background:${s.color};color:#fff;border:none" onclick="startSection('${k}')">Practice</button><button class="btn-section" style="background:transparent;color:${s.color};border:1px solid ${s.color}" onclick="startSection('${k}',true)">Quiz</button></div></div>`;
+});
+
+html+=`<button class="btn btn-primary" style="width:100%;padding:16px 24px;font-size:18px;border-radius:12px;margin-top:8px" onclick="startFull()">🏆 Full Mock Exam (All Sections)</button>`;
+html+=`<div class="stats"><div class="stat"><div class="val">5</div><div class="label">Sections</div></div><div class="stat"><div class="val">95+</div><div class="label">Question Types</div></div><div class="stat"><div class="val">Mon</div><div class="label">Your Test</div></div></div>`;
+}
+
+if(state.view==="quiz"){
+const title=state.section==="all"?"🏆 Full Mock Exam":sections[state.section]?.title;
+html+=`<div style="margin-bottom:20px"><h2 style="font-size:22px;margin-bottom:4px">${title}</h2><p style="color:#94a3b8;font-size:14px">${state.mode==="exam"?"Exam Mode":"Practice Mode"} · ${answered}/${state.questions.length} answered</p><div class="progress"><div class="progress-fill" style="width:${(answered/state.questions.length)*100}%"></div></div></div>`;
+
+state.questions.forEach((q,i)=>{
+const ua=state.answers[i]||"";
+const isCorrect=state.showResults&&ua.toLowerCase().replace(/\s/g,"")===q.answer.toLowerCase().replace(/\s/g,"");
+const cls=state.showResults?(isCorrect?"correct":"wrong"):"";
+
+html+=`<div class="q-card ${cls}"><div class="q-num">Question ${i+1}</div><div class="q-text">${q.question}</div>`;
+
+if(q.type==="mc"&&q.choices){
+q.choices.forEach(c=>{
+html+=`<button class="mc-btn ${ua===c?"selected":""}" onclick="${state.showResults?"":`setAnswer(${i},'${c.replace(/'/g,"\\'")}')`}">${c}</button>`;
+});
+}else{
+html+=`<input type="text" value="${(ua||"").replace(/"/g,"&quot;")}" oninput="setAnswer(${i},this.value)" placeholder="Type your answer..." ${state.showResults?"disabled":""}/>`;
+}
+
+if(state.showResults){
+html+=isCorrect?`<div class="result-correct">✓ Correct!</div>`:`<div class="result-wrong">✗ Answer: ${q.answer}</div>`;
+html+=`<div class="hint">💡 ${q.hint}</div>`;
+}
+html+=`</div>`;
+});
+
+if(!state.showResults){
+html+=`<button class="btn btn-primary" style="width:100%;padding:16px;font-size:17px;border-radius:12px;margin-top:8px" onclick="submit()">✅ Submit Answers</button>`;
+}else{
+const correct=state.questions.filter((q,i)=>(state.answers[i]||"").toLowerCase().replace(/\s/g,"")===q.answer.toLowerCase().replace(/\s/g,"")).length;
+html+=`<div class="final-score"><div class="big">${correct}/${state.questions.length}</div><div class="sub">Correct</div></div>`;
+html+=`<div class="center"><button class="btn btn-primary" onclick="startSection('${state.section==="all"?"0.1":state.section}')">🔄 Try Again</button><button class="btn btn-ghost" onclick="goMenu()">← Menu</button></div>`;
+}
+}
+
+html+=`</div>`;
+app.innerHTML=html;
+}
+
+render();
+</script>
+</body>
+</html>
