@@ -264,6 +264,8 @@ function startSection(sec,exam=false){state.section=sec;state.mode=exam?"exam":"
 
 function startFull(){const all=[];Object.keys(generators).forEach(s=>{const gs=generators[s];for(let i=0;i<4;i++)all.push(gs[i%gs.length]())});state.questions=shuffle(all);state.section="all";state.mode="exam";state.answers={};state.showResults=false;state.view="quiz";render();}
 
+function norm(s){return s.toLowerCase().replace(/\s/g,"").replace(/\u00B2/g,"^2").replace(/\u00B3/g,"^3").replace(/\u221A/g,"sqrt");}
+
 function setAnswer(i,v){state.answers[i]=v;render();}
 
 function typeAnswer(i,v){
@@ -276,7 +278,7 @@ const info=document.getElementById('progress-info');
 if(info) info.textContent=`${state.mode==="exam"?"Exam Mode":"Practice Mode"} \u00B7 ${answered}/${total} answered`;
 }
 
-function submit(){state.showResults=true;if(state.section&&state.section!=="all"){let c=0;state.questions.forEach((q,i)=>{if((state.answers[i]||"").toLowerCase().replace(/\s/g,"")===q.answer.toLowerCase().replace(/\s/g,""))c++});state.scores[state.section]=Math.round(c/state.questions.length*100);}render();}
+function submit(){state.showResults=true;if(state.section&&state.section!=="all"){let c=0;state.questions.forEach((q,i)=>{if(norm(state.answers[i]||"")===norm(q.answer))c++});state.scores[state.section]=Math.round(c/state.questions.length*100);}render();}
 
 function goMenu(){state.view="menu";render();}
 function toggleFormulas(){state.showFormulas=!state.showFormulas;render();}
@@ -318,7 +320,7 @@ html+=`<div style="margin-bottom:20px"><h2 style="font-size:22px;margin-bottom:4
 
 state.questions.forEach((q,i)=>{
 const ua=state.answers[i]||"";
-const isCorrect=state.showResults&&ua.toLowerCase().replace(/\s/g,"")===q.answer.toLowerCase().replace(/\s/g,"");
+const isCorrect=state.showResults&&norm(ua)===norm(q.answer);
 const cls=state.showResults?(isCorrect?"correct":"wrong"):"";
 
 html+=`<div class="q-card ${cls}"><div class="q-num">Question ${i+1}</div><div class="q-text">${q.question}</div>`;
@@ -344,7 +346,7 @@ html+=`</div>`;
 if(!state.showResults){
 html+=`<button class="btn btn-primary" style="width:100%;padding:16px;font-size:17px;border-radius:12px;margin-top:8px" onclick="submit()">\u2705 Submit Answers</button>`;
 }else{
-const correct=state.questions.filter((q,i)=>(state.answers[i]||"").toLowerCase().replace(/\s/g,"")===q.answer.toLowerCase().replace(/\s/g,"")).length;
+const correct=state.questions.filter((q,i)=>norm(state.answers[i]||"")===norm(q.answer)).length;
 html+=`<div class="final-score"><div class="big">${correct}/${state.questions.length}</div><div class="sub">Correct</div></div>`;
 html+=`<div class="center"><button class="btn btn-primary" onclick="startSection('${state.section==="all"?"0.1":state.section}')">\u{1F504} Try Again</button><button class="btn btn-ghost" onclick="goMenu()">\u2190 Menu</button></div>`;
 }
