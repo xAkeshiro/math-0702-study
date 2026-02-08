@@ -266,6 +266,16 @@ function startFull(){const all=[];Object.keys(generators).forEach(s=>{const gs=g
 
 function setAnswer(i,v){state.answers[i]=v;render();}
 
+function typeAnswer(i,v){
+state.answers[i]=v;
+const answered=Object.keys(state.answers).length;
+const total=state.questions.length;
+const fill=document.querySelector('.progress-fill');
+if(fill) fill.style.width=((answered/total)*100)+'%';
+const info=document.getElementById('progress-info');
+if(info) info.textContent=`${state.mode==="exam"?"Exam Mode":"Practice Mode"} \u00B7 ${answered}/${total} answered`;
+}
+
 function submit(){state.showResults=true;if(state.section&&state.section!=="all"){let c=0;state.questions.forEach((q,i)=>{if((state.answers[i]||"").toLowerCase().replace(/\s/g,"")===q.answer.toLowerCase().replace(/\s/g,""))c++});state.scores[state.section]=Math.round(c/state.questions.length*100);}render();}
 
 function goMenu(){state.view="menu";render();}
@@ -304,7 +314,7 @@ html+=`<div class="stats"><div class="stat"><div class="val">5</div><div class="
 
 if(state.view==="quiz"){
 const title=state.section==="all"?"\u{1F3C6} Full Mock Exam":sections[state.section]?.title;
-html+=`<div style="margin-bottom:20px"><h2 style="font-size:22px;margin-bottom:4px">${title}</h2><p style="color:#94a3b8;font-size:14px">${state.mode==="exam"?"Exam Mode":"Practice Mode"} \u00B7 ${answered}/${state.questions.length} answered</p><div class="progress"><div class="progress-fill" style="width:${(answered/state.questions.length)*100}%"></div></div></div>`;
+html+=`<div style="margin-bottom:20px"><h2 style="font-size:22px;margin-bottom:4px">${title}</h2><p id="progress-info" style="color:#94a3b8;font-size:14px">${state.mode==="exam"?"Exam Mode":"Practice Mode"} \u00B7 ${answered}/${state.questions.length} answered</p><div class="progress"><div class="progress-fill" style="width:${(answered/state.questions.length)*100}%"></div></div></div>`;
 
 state.questions.forEach((q,i)=>{
 const ua=state.answers[i]||"";
@@ -318,7 +328,7 @@ q.choices.forEach(c=>{
 html+=`<button class="mc-btn ${ua===c?"selected":""}" onclick="${state.showResults?"":`setAnswer(${i},'${c.replace(/'/g,"\\'")}')`}">${c}</button>`;
 });
 }else{
-html+=`<input type="text" value="${(ua||"").replace(/"/g,"&quot;")}" oninput="setAnswer(${i},this.value)" placeholder="Type your answer..." ${state.showResults?"disabled":""}/>`;
+html+=`<input type="text" value="${(ua||"").replace(/"/g,"&quot;")}" oninput="typeAnswer(${i},this.value)" placeholder="Type your answer..." ${state.showResults?"disabled":""}/>`;
 }
 
 if(state.showResults){
